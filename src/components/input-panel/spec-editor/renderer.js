@@ -2,6 +2,7 @@ import React from 'react';
 import { MODES } from '../../../constants';
 import MonacoEditor from 'react-monaco-editor';
 import { hashHistory } from 'react-router';
+import parser from 'vega-schema-url-parser'
 
 import './index.css'
 
@@ -43,6 +44,14 @@ export default class Editor extends React.Component {
 
   handleEditorChange (spec) {
     if(this.props.autoParse) {
+      let schema = spec.$schema;
+      let parsedMode;
+      if (schema) {
+        parsedMode = parser(schema).library;
+      }
+      if (parsedMode && this.props.mode !== parsedMode) {
+        this.props.setMode(parsedMode);
+      }
       if (this.props.mode === MODES.Vega) {
         this.props.updateVegaSpec(spec);
       } else if (this.props.mode === MODES.VegaLite) {
@@ -64,8 +73,15 @@ export default class Editor extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-
     if(nextProps.parse) {
+      let schema = this.spec.$schema;
+      let parsedMode;
+      if (schema) {
+        parsedMode = parser(schema).library;
+      }
+      if (parsedMode && this.props.mode !== parsedMode) {
+        this.props.setMode(parsedMode);
+      }
       if (this.props.mode === MODES.Vega) {
         this.props.updateVegaSpec(this.spec);
       } else if (this.props.mode === MODES.VegaLite) {

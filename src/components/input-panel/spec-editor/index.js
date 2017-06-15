@@ -26,6 +26,10 @@ const mapDispatchToProps = function (dispatch) {
 
     parseSpec: (val) => {
       dispatch(EditorActions.parseSpec(val));
+    },
+
+    setMode: (val) => {
+      dispatch(EditorActions.setMode(val));
     }
   };
 };
