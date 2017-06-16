@@ -30,6 +30,16 @@ const mapDispatchToProps = function (dispatch) {
 
     setMode: (val) => {
       dispatch(EditorActions.setMode(val));
+    },
+
+    changeToVegaMode: (mode, spec) => {
+      dispatch(EditorActions.setMode(mode));
+      dispatch(EditorActions.updateVegaSpec(spec));
+    },
+
+    changeToVegaLiteMode: (mode, spec) => {
+      dispatch(EditorActions.setMode(mode));
+      dispatch(EditorActions.updateVegaLiteSpec(spec));
     }
   };
 };

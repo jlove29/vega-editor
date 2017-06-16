@@ -43,25 +43,39 @@ export default class Editor extends React.Component {
   }
 
   handleEditorChange (spec) {
-    if(this.props.autoParse) {
-      let schema = spec.$schema;
+    this.spec = spec;
+    if (this.props.autoParse) {
+      let schema = JSON.parse(spec).$schema;
       let parsedMode;
       if (schema) {
         parsedMode = parser(schema).library;
       }
-      if (parsedMode && this.props.mode !== parsedMode) {
-        this.props.setMode(parsedMode);
-      }
-      if (this.props.mode === MODES.Vega) {
-        this.props.updateVegaSpec(spec);
-      } else if (this.props.mode === MODES.VegaLite) {
-        this.props.updateVegaLiteSpec(spec);
+      if (parsedMode !== undefined && this.props.mode !== parsedMode) {
+        if (hashHistory.getCurrentLocation().pathname.indexOf('/edited') === -1) {
+          hashHistory.push(`${parsedMode}/edited`);
+        }
+        if (parsedMode === MODES.Vega) {
+          this.props.changeToVegaMode(parsedMode, spec);
+        } else if (parsedMode === MODES.VegaLite) {
+          this.props.changeToVegaLiteMode(parsedMode, spec);
+        }
+      } else {
+        if (hashHistory.getCurrentLocation().pathname.indexOf('/edited') === -1) {
+          hashHistory.push(`${this.props.mode}/edited`);
+        }
+        if (this.props.mode === MODES.Vega) {
+          this.props.updateVegaSpec(spec);
+        } else if (this.props.mode === MODES.VegaLite) {
+          this.props.updateVegaLiteSpec(spec);
+        }
       }
     }
-    this.spec = spec;
-    if (hashHistory.getCurrentLocation().pathname.indexOf('/edited') === -1) {
-      hashHistory.push(`${this.props.mode}/edited`);
-    }
+  }
+
+  editorDidMount () {
+    this.setState({
+      editorMounted: true,
+    })
   }
 
   editorWillMount (monaco) {
@@ -73,19 +87,24 @@ export default class Editor extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if(nextProps.parse) {
-      let schema = this.spec.$schema;
+    if (nextProps.parse) {
+      let schema = JSON.parse(this.spec).$schema;
       let parsedMode;
       if (schema) {
         parsedMode = parser(schema).library;
       }
-      if (parsedMode && this.props.mode !== parsedMode) {
-        this.props.setMode(parsedMode);
-      }
-      if (this.props.mode === MODES.Vega) {
-        this.props.updateVegaSpec(this.spec);
-      } else if (this.props.mode === MODES.VegaLite) {
-        this.props.updateVegaLiteSpec(this.spec);
+      if (parsedMode !== undefined && this.props.mode !== parsedMode) {
+        if (parsedMode === MODES.Vega) {
+          this.props.changeToVegaMode(parsedMode, this.spec);
+        } else if (parsedMode === MODES.VegaLite) {
+          this.props.changeToVegaLiteMode(parsedMode, this.spec);
+        }
+      } else {
+        if (this.props.mode === MODES.Vega) {
+          this.props.updateVegaSpec(this.spec);
+        } else if (this.props.mode === MODES.VegaLite) {
+          this.props.updateVegaLiteSpec(this.spec);
+        }
       }
       this.props.parseSpec(false);
     }
@@ -107,6 +126,7 @@ export default class Editor extends React.Component {
         defaultValue={this.props.value}
         onChange={debounce(this.handleEditorChange, 500).bind(this)}
         editorWillMount={this.editorWillMount.bind(this)}
+        editorDidMount={this.editorDidMount.bind(this)}
       />
     );
   };

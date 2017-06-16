@@ -37,7 +37,7 @@ class App extends React.Component {
 
     const parameter = this.props.params;
     if (parameter.mode && hashHistory.getCurrentLocation().pathname.indexOf('/edited') === -1) {
-       this.props.setMode(parameter.mode);
+      this.props.setMode(parameter.mode);
     }
 
     setTimeout(() => {
